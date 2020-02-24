@@ -11,6 +11,7 @@ from app.forms import UploadForm
 from werkzeug.utils import secure_filename
 
 
+
 ###
 # Routing for your application.
 ###
@@ -71,6 +72,13 @@ def logout():
     flash('You were logged out', 'success')
     return redirect(url_for('home'))
 
+@app.route('/files')
+def files():
+    if not session.get('logged_in'):
+        abort(401)
+    Images=get_uploaded_images()
+    return render_template('files.html',images=Images)
+
 
 ###
 # The functions below should be applicable to all Flask apps.
@@ -84,6 +92,14 @@ def flash_errors(form):
                 getattr(form, field).label.text,
                 error
 ), 'danger')
+
+def get_uploaded_images():
+    images = []
+    rootdir = os.getcwd()
+    for subdir, dirs, files in os.walk(rootdir + '/app/static/uploads'):     
+        for p in files:
+            images.append(os.path.join(p))
+    return(images)
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):
